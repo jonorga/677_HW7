@@ -6,6 +6,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import train_test_split 
 pd.options.mode.chained_assignment = None  # default='warn'
 
 
@@ -107,7 +109,6 @@ print("\n")
 # Question 2.4 ====================================================================================================
 print("Question 2.4:")
 confusion_matrix = pd.crosstab(df_test['color'], df_test['simple_predict'])
-print(confusion_matrix)
 simple_TP = confusion_matrix['Green'].iloc[0]
 simple_FP = confusion_matrix['Green'].iloc[1]
 simple_TN = confusion_matrix['Red'].iloc[1]
@@ -125,6 +126,85 @@ print("Question 2.5:")
 print("{:<8} {:<8} {:<8} {:<8} {:<8} {:<8} {:<8}".format('TP', 'FP', 'TN', 'FN', 'accuracy', 'TPR', 'TNR'))
 print("{:<8} {:<8} {:<8} {:<8} {:<8} {:<8} {:<8}".format(simple_TP, simple_FP, simple_TN, simple_FN,
 	simple_accuracy, simple_TPR, simple_TNR))
+
+
+
+print("\n")
+# Question 2.6 ====================================================================================================
+print("Question 2.6:")
+print("My simple classifier is perfect at identifying fake bills, and very bad at identifying real bills."
+	+ " The overall accuracy is just barely better than flipping a coin (53%)")
+
+
+print("\n")
+# Question 3.1 ====================================================================================================
+print("Question 3.1:")
+q31_y = df['color']
+q31_x = df.drop('color', axis = 1)
+q31_x = q31_x.drop('class', axis = 1)
+
+q31_x_train, q31_x_test, q31_y_train, q31_y_test = train_test_split(q31_x, q31_y, test_size = 0.5, random_state = 0)
+
+K_vals = [3, 5, 7, 9, 11]
+q31_training = []
+q31_scores = []
+
+for k in K_vals:
+	clf = KNeighborsClassifier(n_neighbors = k)
+	clf.fit(q31_x_train, q31_y_train)
+
+	training_score = clf.score(q31_x_train, q31_y_train)
+	test_score = clf.score(q31_x_test, q31_y_test)
+
+	q31_training.append(training_score)
+	q31_scores.append(test_score)
+
+print("kNN accuracy computed...")
+
+
+print("\n")
+# Question 3.2 ====================================================================================================
+print("Question 3.2:")
+
+def Q32GenerateGraph(data):
+	fig, ax = plt.subplots()
+	ax.plot(data["k_Value"], data["k_Accuracy"])
+	ax.set(xlabel='k Value', ylabel='k Accuracy',
+	       title='k Accuracy by Value')
+	ax.grid()
+	print("Saving k Accuracy by Value graph...")
+	fig.savefig("results/Q3.2_k_accuracy.png")
+
+q32_frame_data = [[3, q31_scores[0]], [5, q31_scores[1]], [7, q31_scores[2]], [9, q31_scores[3]], [11, q31_scores[4]]]
+q32_df = pd.DataFrame(q32_frame_data, columns=['k_Value', 'k_Accuracy'])
+Q32GenerateGraph(q32_df)
+
+
+print("\n")
+# Question 3.3 ====================================================================================================
+print("Question 3.3:")
+print("{:<8} {:<8} {:<8} {:<8} {:<8} {:<8} {:<8}".format('TP', 'FP', 'TN', 'FN', 'accuracy', 'TPR', 'TNR'))
+
+clf = KNeighborsClassifier(n_neighbors = 7)
+clf.fit(q31_x_train, q31_y_train)
+q33_predicted = clf.predict(q31_x_test)
+
+q33_cm = pd.crosstab(q31_y_test, q33_predicted)
+
+kNN_TP = q33_cm['Green'].iloc[0]
+kNN_FP = q33_cm['Green'].iloc[1]
+kNN_TN = q33_cm['Red'].iloc[1]
+kNN_FN = q33_cm['Red'].iloc[0]
+kNN_accuracy = round(q31_scores[2], 2)
+kNN_TPR = round(kNN_TP / (kNN_TP + kNN_FN), 2)
+kNN_TNR = round(kNN_TN / (kNN_TN + kNN_FP), 2)
+print("{:<8} {:<8} {:<8} {:<8} {:<8} {:<8} {:<8}".format(kNN_TP, kNN_FP, kNN_TN, kNN_FN,
+	kNN_accuracy, kNN_TPR, kNN_TNR))
+
+
+print("\n")
+# Question 3.4 ====================================================================================================
+print("Question 3.4:")
 
 
 
