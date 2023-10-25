@@ -7,6 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split 
 pd.options.mode.chained_assignment = None  # default='warn'
 
@@ -60,9 +61,9 @@ print("\n")
 # Question 1.3 ====================================================================================================
 print("Question 1.3:")
 print("It seems that generally if a bank note has a positive value for F1 (variance), then it's green."
-	+ "\nIf the F2 (skewness) value is greater than 2, it seems to be green. If the F3 (curtosis) value"
-	+ "\nis greater than 1.4, its green. Finally if the F4 (entropy) value is greater than -1.19, then"
-	+ "\n its green. The volatility doesn't seem to show any siginificant patterns")
+	+ " If the F2 (skewness) value is greater than 2, it seems to be green. If the F3 (curtosis) value"
+	+ " is greater than 1.4, its green. Finally if the F4 (entropy) value is greater than -1.19, then"
+	+ " its green. The volatility doesn't seem to show any siginificant patterns")
 
 
 
@@ -123,6 +124,7 @@ print("Simple classifier labels evaluators computed...")
 print("\n")
 # Question 2.5 ====================================================================================================
 print("Question 2.5:")
+print("Simple classifier table:")
 print("{:<8} {:<8} {:<8} {:<8} {:<8} {:<8} {:<8}".format('TP', 'FP', 'TN', 'FN', 'accuracy', 'TPR', 'TNR'))
 print("{:<8} {:<8} {:<8} {:<8} {:<8} {:<8} {:<8}".format(simple_TP, simple_FP, simple_TN, simple_FN,
 	simple_accuracy, simple_TPR, simple_TNR))
@@ -183,6 +185,7 @@ Q32GenerateGraph(q32_df)
 print("\n")
 # Question 3.3 ====================================================================================================
 print("Question 3.3:")
+print("kNN classifier table:")
 print("{:<8} {:<8} {:<8} {:<8} {:<8} {:<8} {:<8}".format('TP', 'FP', 'TN', 'FN', 'accuracy', 'TPR', 'TNR'))
 
 clf = KNeighborsClassifier(n_neighbors = 7)
@@ -205,6 +208,140 @@ print("{:<8} {:<8} {:<8} {:<8} {:<8} {:<8} {:<8}".format(kNN_TP, kNN_FP, kNN_TN,
 print("\n")
 # Question 3.4 ====================================================================================================
 print("Question 3.4:")
+print("My kNN classifier was much more accurate in every way compared to my simple classifier")
+
+
+
+print("\n")
+# Question 3.5 ====================================================================================================
+print("Question 3.5:")
+# Last 4 of BUID: 4376
+buid_bill = pd.DataFrame([[4, 3, 7, 6]], columns=["variance", "skewness", "curtosis", "entropy"])
+q35_simple = Q23SimplePredict(buid_bill.iloc[0])
+q35_kNN = clf.predict(buid_bill)	
+print("Simple classifier prediction for BUID:", q35_simple, 
+	"\nkNN classifier prediction for BUID:", q35_kNN[0])
+
+
+
+print("\n")
+# Question 4.1 ====================================================================================================
+print("Question 4.1:")
+# kNN, n = 7, with each of the features missing
+q41_y = df['color']
+q41_x = df.drop('color', axis = 1)
+q41_x = q41_x.drop('class', axis = 1)
+
+def Q41kNNMinusFeat(x_set, y_set, feature):
+	x_set = x_set.drop(feature, axis = 1)
+	q41_x_train, q41_x_test, q41_y_train, q41_y_test = train_test_split(x_set, y_set, 
+		test_size = 0.5, random_state = 0)
+
+	clf = KNeighborsClassifier(n_neighbors = 7)
+	clf.fit(q41_x_train, q41_y_train)
+
+	return clf.score(q41_x_test, q41_y_test)
+
+
+q41_f1_acc = Q41kNNMinusFeat(q41_x, q41_y, "variance")
+q41_f2_acc = Q41kNNMinusFeat(q41_x, q41_y, "skewness")
+q41_f3_acc = Q41kNNMinusFeat(q41_x, q41_y, "curtosis")
+q41_f4_acc = Q41kNNMinusFeat(q41_x, q41_y, "entropy")
+print("kNN minus 1 feature accuracy computed for each feature")
+
+
+
+print("\n")
+# Question 4.2 ====================================================================================================
+print("Question 4.2:")
+print("kNN minus F1 accuracy: " + str(round(q41_f1_acc * 100, 2)) + "%"
+	+ "\nkNN minus F2 accuracy: " + str(round(q41_f2_acc * 100, 2)) + "%"
+	+ "\nkNN minus F3 accuracy: " + str(round(q41_f3_acc * 100, 2)) + "%"
+	+ "\nkNN minus F4 accuracy: " + str(round(q41_f4_acc * 100, 2)) + "%"
+	+ "\nNone of these were more accurate than all 4 working together")
+
+
+
+print("\n")
+# Question 4.3 ====================================================================================================
+print("Question 4.3:")
+print("Removing feature F1 (variance) caused the greatest accuracy loss")
+
+
+
+print("\n")
+# Question 4.4 ====================================================================================================
+print("Question 4.4:")
+print("Removing feature F4 (entropy) caused the least accuracy loss")
+
+
+
+print("\n")
+# Question 5.1 ====================================================================================================
+print("Question 5.1:")
+model = LogisticRegression(solver='liblinear', random_state=0)
+
+q51_y = df['color']
+q51_x = df.drop('color', axis = 1)
+q51_x = q51_x.drop('class', axis = 1)
+q51_x_train, q51_x_test, q51_y_train, q51_y_test = train_test_split(q51_x, q51_y, 
+	test_size = 0.5, random_state = 0)
+model.fit(q51_x_train, q51_y_train)
+q51_acc = round(model.score(q51_x_test, q51_y_test), 2)
+print("Logistic regression classifier accuracy: " + str(q51_acc) + "%")
+
+
+print("\n")
+# Question 5.2 ====================================================================================================
+print("Question 5.2:")
+print("Logistic regression classifier table:")
+print("{:<8} {:<8} {:<8} {:<8} {:<8} {:<8} {:<8}".format('TP', 'FP', 'TN', 'FN', 'accuracy', 'TPR', 'TNR'))
+
+q52_predicted = model.predict(q51_x_test)
+q52_cm = pd.crosstab(q51_y_test, q52_predicted)
+
+LRC_TP = q52_cm['Green'].iloc[0]
+LRC_FP = q52_cm['Green'].iloc[1]
+LRC_TN = q52_cm['Red'].iloc[1]
+LRC_FN = q52_cm['Red'].iloc[0]
+LRC_accuracy = q51_acc
+LRC_TPR = round(LRC_TP / (LRC_TP + LRC_FN), 2)
+LRC_TNR = round(LRC_TN / (LRC_TN + LRC_FP), 2)
+print("{:<8} {:<8} {:<8} {:<8} {:<8} {:<8} {:<8}".format(LRC_TP, LRC_FP, LRC_TN, LRC_FN,
+	LRC_accuracy, LRC_TPR, LRC_TNR))
+
+
+print("\n")
+# Question 5.3 ====================================================================================================
+print("Question 5.3:")
+print("My logistic regression classifier was much better than my simple classifier in its accuracy"
+	+ " and TPR, they both had the same TNR however")
+
+
+
+print("\n")
+# Question 5.4 ====================================================================================================
+print("Question 5.4:")
+print("My logistic regression classifier and my kNN classifier are comparable in terms of their"
+	+ " performance. However, the kNN classifier was slightly more accurate as it had no false"
+	+ " positives or negatives, whereas the logistic regression had 1 false positive, and 8 false"
+	+ " negatives.")
+
+
+print("\n")
+# Question 5.5 ====================================================================================================
+print("Question 5.5:")
+q55_LRC = model.predict(buid_bill)
+print("Logistic regression classifier prediction for BUID:", q55_LRC)
+print("This is the same label as predicted by kNN")
+
+
+
+print("\n")
+# Question 6.1 ====================================================================================================
+print("Question 6.1:")
+
+
 
 
 
