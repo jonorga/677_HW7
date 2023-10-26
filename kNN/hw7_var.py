@@ -127,7 +127,7 @@ q16_knn_bal = Q16Strategy(df[(df['Week'] > 50) & (df['Week'] <= 100)])
 print("Calculated kNN (p = 1) result: $" + str(q16_knn_bal))
 print("Buy-and-hold results in a larger balance at the end of the year")
 
-# 209.81
+
 
 print("\n")
 # Question 1.7 ====================================================================================================
@@ -175,6 +175,47 @@ q22_predicted = clf.predict(q12_x_test)
 q22_test_score = clf.score(q12_x_test, q12_y_test)
 print("Using the k* (3) from year 1, the accuracy for year 2 is: " + str(round(q22_test_score, 2)) + "%")
 
+
+print("\n")
+# Question 2.3 ====================================================================================================
+print("Question 2.3:")
+
+print("k* confusion matrix for year 2:")
+q23_cm = pd.crosstab(q12_y_test, q22_predicted)
+print(q23_cm)
+
+
+print("\n")
+# Question 2.4 ====================================================================================================
+print("Question 2.4:")
+print("The optimal k* value is 3, which is different from the 11 obtained by the previous assignment")
+
+
+print("\n")
+# Question 2.5 ====================================================================================================
+print("Question 2.5:")
+print("Year 2 true positive rate: 0%\nYear 2 true negative rate: 100%")
+
+
+print("\n")
+# Question 2.6 ====================================================================================================
+print("Question 2.6:")
+print("Buy-and-hold result from previous assignment: $125.70")
+print("Calculated kNN (p = 1.5) result: $" + str(q16_knn_bal))
+print("Buy-and-hold results in a larger balance at the end of the year")
+
+
+print("\n")
+# Question 2.7 ====================================================================================================
+print("Question 2.7:")
+print("Using Euclidean kNN resulted in $209.81 at the end of the year, so the Minkowski metric"
+	+ " was a decline in performance")
+
+
+
+print("\n")
+# Question 3.1 ====================================================================================================
+print("Question 3.1:")
 
 
 
