@@ -216,8 +216,105 @@ print("Using Euclidean kNN resulted in $209.81 at the end of the year, so the Mi
 print("\n")
 # Question 3.1 ====================================================================================================
 print("Question 3.1:")
+g_ar_sum = df['Avg_Return'][(df['Week'] <= 50) & (df['Color'] == "Green")].sum()
+g_v_sum = df['Volatility'][(df['Week'] <= 50) & (df['Color'] == "Green")].sum()
+r_ar_sum = df['Avg_Return'][(df['Week'] <= 50) & (df['Color'] == "Red")].sum()
+r_v_sum = df['Volatility'][(df['Week'] <= 50) & (df['Color'] == "Red")].sum()
+g_count = df['Week'][(df['Week'] <= 50) & (df['Color'] == "Green")].count()
+r_count = df['Week'][(df['Week'] <= 50) & (df['Color'] == "Red")].count()
+
+g_centroid = [g_ar_sum / g_count, g_v_sum / g_count]
+r_centroid = [r_ar_sum / r_count, r_v_sum / r_count]
 
 
+
+def Q31DistToGreenCent(row):
+	x_c = (g_centroid[0] - row['Avg_Return']) ** 2 
+	y_c = (g_centroid[1] - row['Volatility']) ** 2
+	return math.sqrt(x_c + y_c)
+
+def Q31DistToRedCent(row):
+	x_c = (r_centroid[0] - row['Avg_Return']) ** 2 
+	y_c = (r_centroid[1] - row['Volatility']) ** 2
+	return math.sqrt(x_c + y_c)
+
+df['dist_to_greencent'] = df.apply(Q31DistToGreenCent, axis=1)
+df['dist_to_redcent'] = df.apply(Q31DistToRedCent, axis=1)
+
+
+g_cent_avg = df['dist_to_greencent'][df['Week'] <= 50].mean()
+g_cent_med = df['dist_to_greencent'][df['Week'] <= 50].median()
+
+r_cent_avg = df['dist_to_redcent'][df['Week'] <= 50].mean()
+r_cent_med = df['dist_to_redcent'][df['Week'] <= 50].median()
+
+if g_cent_avg > r_cent_avg:
+	print("The green centroid has a larger average radius (" + str(round(g_cent_avg, 5))
+		+ ") than the red centroid (" + str(round(r_cent_avg, 5)) + ")")
+else:
+	print("The green centroid has a smaller average radius (" + str(round(g_cent_avg, 5))
+		+ ") than the red centroid (" + str(round(r_cent_avg, 5)) + ")")
+
+if g_cent_med > r_cent_med:
+	print("The green centroid has a larger median radius (" + str(round(g_cent_med, 5))
+		+ ") than the red centroid (" + str(round(r_cent_med, 5)) + ")")
+else:
+	print("The green centroid has a smaller median radius (" + str(round(g_cent_med, 5))
+		+ ") than the red centroid (" + str(round(r_cent_med, 5)) + ")")
+
+
+print("\n")
+# Question 3.2 ====================================================================================================
+print("Question 3.2:")
+
+def Q32CentPredict(row):
+	if row['dist_to_greencent'] < row['dist_to_redcent']:
+		return "Green"
+	else:
+		return "Red"
+
+df['y2_cent_predict'] = df.apply(Q32CentPredict, axis=1)
+q32_cm = pd.crosstab(df['Color'][(df['Week'] > 50) & (df['Week'] <= 100)], 
+	df['y2_cent_predict'][(df['Week'] > 50) & (df['Week'] <= 100)])
+
+# TPR = TP / TP + FN
+# TNR = TN / TN + FP
+q32_TPR = q32_cm['Green'].iloc[0] / (q32_cm['Green'].iloc[0] + q32_cm['Red'].iloc[0])
+q32_TNR = q32_cm['Red'].iloc[1] / (q32_cm['Red'].iloc[1] + q32_cm['Green'].iloc[1])
+print("Using centroids, the true positive rate for year 2 was: " + str(round(q32_TPR * 100, 2)) + "%")
+print("Using centroids, the true negative rate for year 2 was: " + str(round(q32_TNR * 100, 2)) + "%")
+
+
+print("\n")
+# Question 3.3 ====================================================================================================
+print("Question 3.3:")
+print("Buy-and-hold result from previous assignment: $125.70")
+
+def Q33Strategy(df):
+	balance = 100
+	file_len = len(df.index)
+	i = 0
+	while i < file_len - 1:
+		today_stock = balance / df['Close'].iloc[i]
+		tmr_stock = balance / df['Close'].iloc[i + 1]
+		difference = abs(today_stock - tmr_stock)
+		if df['Color'].iloc[i] == df['y2_cent_predict'].iloc[i]:
+			balance += difference * df["Close"].iloc[i + 1]
+		else:
+			balance -= difference * df["Close"].iloc[i + 1]
+		i += 1
+	return round(balance, 2)
+
+centroid_bal = Q33Strategy(df[(df['Week'] > 50) & (df['Week'] <= 100)])
+print("Centroid strategy result: $" + str(centroid_bal))
+print("The centroid strategy results in a higher balance than buy-and-hold")
+
+
+print("\n")
+# Question 3.4 ====================================================================================================
+print("Question 3.4:")
+print("Using Euclidean kNN resulted in $209.81 at the end of the year, so the centroid strategy"
+	+ " was an improvement in performance")
 
 
 
